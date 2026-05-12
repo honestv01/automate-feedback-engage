@@ -58,7 +58,7 @@ export default function SendScreen() {
   }
 
 
-  const smsPreview = `Hi ${name || '[Customer]'}, this is ${s.currentUser?.name.split(' ')[0]} from ${s.business.name}. Thanks for choosing us! Mind sharing a quick review? ${'reviewboost.io/r/abc'} Reply STOP to opt out.`;
+   const smsPreview = `Hi ${name || '[Customer]'}, this is ${s.currentUser?.name?.split(' ')[0] || 'Team'} from ${s.business.name}. Thanks for choosing us! Mind sharing a quick review? ${'reviewboost.io/r/abc'} Reply STOP to opt out.`;
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: theme.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>

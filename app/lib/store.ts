@@ -109,6 +109,81 @@ function mapEmployee(row: any): Employee {
   };
 }
 
+function generateMockRequests(employees: Employee[]): ReviewRequest[] {
+  const requests: ReviewRequest[] = [];
+  const statuses: RequestStatus[] = ['pending', 'clicked', 'reviewed', 'feedback'];
+  const names = ['John Smith', 'Sarah Johnson', 'Mike Wilson', 'Emily Davis', 'Robert Brown', 'Lisa Garcia', 'David Martinez', 'Jennifer Taylor'];
+
+  // Generate 20-40 mock requests over last 90 days
+  const count = 20 + Math.floor(Math.random() * 20);
+
+  for (let i = 0; i < count; i++) {
+    const employee = employees[Math.floor(Math.random() * employees.length)];
+    const daysAgo = Math.floor(Math.random() * 90);
+    const createdAt = Date.now() - daysAgo * 86400000 - Math.floor(Math.random() * 86400000);
+    const statusIdx = Math.floor(Math.random() * 4);
+    const status = statuses[statusIdx];
+
+    let rating: number | undefined;
+    let feedbackText: string | undefined;
+
+    if (status === 'reviewed') {
+      rating = 4 + Math.floor(Math.random() * 2); // 4 or 5
+    } else if (status === 'feedback') {
+      rating = 1 + Math.floor(Math.random() * 3); // 1-3
+      feedbackText = getRandomFeedback();
+    }
+
+    requests.push({
+      id: `mock-${i}-${Date.now()}`,
+      customerName: names[Math.floor(Math.random() * names.length)],
+      phone: `+1555${String(Math.floor(Math.random() * 1000000000)).padStart(9, '0')}`,
+      employeeId: employee.id,
+      employeeName: employee.name,
+      createdAt,
+      status,
+      rating,
+      feedback: feedbackText,
+      reminderSentAt: status === 'clicked' || status === 'reviewed' || status === 'feedback' 
+        ? createdAt + 86400000 * (1 + Math.floor(Math.random() * 2))
+        : undefined,
+    });
+  }
+
+  return requests.sort((a, b) => b.createdAt - a.createdAt);
+}
+
+function getRandomFeedback(): string {
+  const feedbacks = [
+    "Great service, very professional!",
+    "Quick response time, would recommend.",
+    "Could have been better, but acceptable.",
+    "Exceeded expectations, fantastic job!",
+    "Communication was a bit slow but work quality good.",
+    "Very satisfied with the results.",
+    "Not what I expected, disappointed.",
+    "Outstanding work from start to finish!",
+  ];
+  return feedbacks[Math.floor(Math.random() * feedbacks.length)];
+}
+
+function generateMockEmployees(): Employee[] {
+  const names = [
+    { name: 'Alex Thompson', email: 'alex@acme.com' },
+    { name: 'Jordan Lee', email: 'jordan@acme.com' },
+    { name: 'Sam Rivera', email: 'sam@acme.com' },
+    { name: 'Taylor Kim', email: 'taylor@acme.com' },
+  ];
+  return names.map((n, i) => ({
+    id: `emp-${i + 1}`,
+    name: n.name,
+    email: n.email,
+    role: 'employee' as const,
+    active: true,
+    joinedAt: Date.now() - 86400000 * 30 * (i + 1),
+  }));
+}
+
 export async function loadAll() {
   store.set((s) => ({ ...s, loading: true }));
 
@@ -120,9 +195,24 @@ export async function loadAll() {
     supabase.from('review_requests').select('*').eq('business_id', businessId).order('created_at', { ascending: false }).limit(200),
   ]);
 
-  const employees = (emps || []).map(mapEmployee);
+  let employees = (emps || []).map(mapEmployee);
+
+  // If no data, generate mock data for demo
+  if (employees.length === 0) {
+    employees = generateMockEmployees();
+  }
+
   const empMap = new Map(employees.map((e) => [e.id, e.name]));
-  const requests = (reqs || []).map((r) => mapRequest({ ...r, _employee_name: empMap.get(r.employee_id) || '' }));
+  let requests = (reqs || []).map((r) => mapRequest({ ...r, _employee_name: empMap.get(r.employee_id) || '' }));
+
+  if (requests.length === 0 && employees.length > 0) {
+    requests = generateMockRequests(employees);
+  }
+
+   // If no data, generate mock data for demo
+   if (requests.length === 0 && employees.length > 0) {
+     requests = generateMockRequests(employees);
+   }
 
   const feedback: PrivateFeedback[] = requests
     .filter((r) => r.status === 'feedback' && r.rating && r.rating <= 3 && r.feedback)

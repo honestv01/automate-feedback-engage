@@ -262,10 +262,10 @@ const styles = StyleSheet.create({
   barCount: { color: theme.text, fontSize: 11, fontWeight: '600', marginTop: 4 },
   barLabel: { color: theme.textDim, fontSize: 10, marginTop: 2 },
 
-  distRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  distStar: { color: theme.text, fontSize: 13, fontWeight: '600' },
-  distBar: { flex: 1, height: 8, backgroundColor: theme.bgElevated, borderRadius: 99, overflow: 'hidden' },
-  distCount: { color: theme.textMuted, fontSize: 12, width: 24, textAlign: 'right' },
+   distRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+   distStar: { color: theme.text, fontSize: 13, fontWeight: '600', width: 20 },
+   distBar: { flex: 1, height: 8, backgroundColor: theme.bgElevated, borderRadius: 99, overflow: 'hidden', minWidth: 60 },
+   distCount: { color: theme.textMuted, fontSize: 12, width: 24, textAlign: 'right' },
 
   section: { paddingHorizontal: 20, marginTop: 28 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
